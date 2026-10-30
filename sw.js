@@ -1,6 +1,6 @@
 /* Offline support. Bump VERSION whenever you change any app file,
    so phones pick up the new version. */
-var VERSION = "hwc-v1";
+var VERSION = "hwc-v2";
 var FILES = ["./", "index.html", "styles.css", "content.js", "app.js", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
