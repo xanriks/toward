@@ -95,6 +95,7 @@ function setView(v, push) {
     if (b.dataset.v === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
   });
   document.querySelector("nav.bottom").classList.toggle("hidden", v === "setup");
+  var g = document.getElementById("gear"); if (g) g.classList.toggle("hidden", v === "setup");
   render(); window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", function () { var v = location.hash.slice(1); if (v && v !== "reset" && v !== ui.view) setView(v, false); });
