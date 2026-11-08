@@ -19,6 +19,10 @@ Some things to know:
 - **On iPhone, add it to your Home Screen.** Open the site in Safari, tap Share, then Add to Home Screen. Safari can clear a website's saved data after about a week without a visit, but Home Screen apps keep it.
 - **Export a backup now and then,** especially before clearing your browser or switching phones.
 
+## Starting over
+
+The app has no password. To erase everything on a phone and start fresh, tap the gear icon in the top-right, then **Erase and start over**. If the app ever won't open properly, add `#reset` to the end of your link (for example `https://YOUR-USERNAME.github.io/how-we-connect/#reset`) and confirm.
+
 ## Put it online with GitHub Pages (free)
 
 1. Sign in at https://github.com and create a new repository, for example `how-we-connect`. Leave it **Public**, since free GitHub Pages needs a public repo. Only the app's code goes in the repo, never your notes.

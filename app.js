@@ -97,7 +97,7 @@ function setView(v, push) {
   document.querySelector("nav.bottom").classList.toggle("hidden", v === "setup");
   render(); window.scrollTo(0, 0);
 }
-window.addEventListener("hashchange", function () { var v = location.hash.slice(1); if (v && v !== ui.view) setView(v, false); });
+window.addEventListener("hashchange", function () { var v = location.hash.slice(1); if (v && v !== "reset" && v !== ui.view) setView(v, false); });
 
 function render() {
   var el = $("app");
@@ -154,9 +154,9 @@ function vSettings() {
       '<p class="small">On iPhone, add this app to your Home Screen (Share, then Add to Home Screen). Safari can clear website data after a week of not visiting, but Home Screen apps keep it.</p>' +
     '</div>' +
     '<div class="panel stack">' +
-      '<h2>Erase</h2>' +
-      '<p class="small">Removes everything from this phone. Export first if you want to keep it.</p>' +
-      '<button class="btn danger" data-act="erase">Erase all data on this phone</button>' +
+      '<h2>Start over</h2>' +
+      '<p class="small">Erases everything in the app on this phone and takes you back to the welcome screen. Export a backup first if you might want it later.</p>' +
+      '<button class="btn danger" data-act="erase">Erase and start over</button>' +
     '</div>' +
     (storageOk ? '' : '<p class="err">This browser isn’t letting the app save. Private browsing can cause this.</p>') +
   '</div>';
@@ -365,25 +365,92 @@ function resultView(k) {
     '<button class="btn" data-act="resultDone">Continue</button>';
 }
 function mapSVG(keys) {
-  var W = 320, pad = 34, inner = W - pad * 2;
-  var pos = function (x) { return pad + 16 + (x - 1) / 4 * (inner - 32); };
-  var mid = pos(3);
-  var q = function (x, y, t) { return '<text x="' + x + '" y="' + y + '" text-anchor="middle" font-size="13" fill="var(--muted)">' + t + '</text>'; };
-  var body = keys.filter(function (k) { return S.results[k]; }).map(function (k) {
+  var W = 340, pad = 44, inner = W - pad * 2;
+  var pos = function (x) { return pad + 18 + (x - 1) / 4 * (inner - 36); };
+  var mid = pad + inner / 2;
+  var q = function (x, y, t) { return '<text x="' + x + '" y="' + y + '" text-anchor="middle" font-size="13" font-weight="700" fill="var(--muted)">' + t + '</text>'; };
+  var shown = keys.filter(function (k) { return S.results[k]; });
+  var body = shown.map(function (k) {
     var p = S.results[k], cx = pos(p.v), cy = W - pos(p.a);
-    return '<circle cx="' + cx + '" cy="' + cy + '" r="10" fill="' + COLOR(k) + '"/>' +
-      '<text x="' + cx + '" y="' + (cy - 15) + '" text-anchor="middle" font-size="14" font-weight="700" fill="' + COLOR(k) + '">' + esc(N(k)) + '</text>';
+    var label = (isMe(k) ? "You" : N(k)) + ", " + STYLES[styleOf(p)].name.toLowerCase() + ". Tap to see what this means.";
+    return '<g class="dot" data-act="dotInfo" data-k="' + k + '" role="button" tabindex="0" aria-label="' + esc(label) + '">' +
+      '<circle class="pulse" cx="' + cx + '" cy="' + cy + '" r="12" fill="' + COLOR(k) + '"/>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="22" fill="transparent"/>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="12" fill="' + COLOR(k) + '" stroke="var(--surface)" stroke-width="3"/></g>';
   }).join("");
-  return '<svg class="map" viewBox="0 0 ' + W + ' ' + W + '" role="img" aria-label="Attachment map: worry about closeness going up, need for space going right">' +
+  var legend = shown.map(function (k) {
+    return '<button class="legend" data-act="dotInfo" data-k="' + k + '"><span class="sw" style="background:' + COLOR(k) + '"></span>' + esc(isMe(k) ? N(k) + " (you)" : N(k)) + '</button>';
+  }).join("");
+  return '<svg class="map" viewBox="0 0 ' + W + ' ' + W + '" role="group" aria-label="Attachment map: worry about closeness goes up, need for space goes right">' +
     '<rect x="' + pad + '" y="' + pad + '" width="' + inner + '" height="' + inner + '" rx="12" fill="var(--sunk)"/>' +
     '<line x1="' + mid + '" y1="' + pad + '" x2="' + mid + '" y2="' + (W - pad) + '" stroke="var(--line)" stroke-width="2"/>' +
-    '<line x1="' + pad + '" y1="' + (W - mid) + '" x2="' + (W - pad) + '" y2="' + (W - mid) + '" stroke="var(--line)" stroke-width="2"/>' +
-    q(pad + inner / 4, pad + 22, "Anxious") + q(pad + inner * 3 / 4, pad + 22, "Fearful") +
-    q(pad + inner / 4, W - pad - 12, "Secure") + q(pad + inner * 3 / 4, W - pad - 12, "Avoidant") +
-    '<text x="' + (W / 2) + '" y="' + (W - 8) + '" text-anchor="middle" font-size="12" fill="var(--muted)">Need for space</text>' +
-    '<text x="12" y="' + (W / 2) + '" text-anchor="middle" font-size="12" fill="var(--muted)" transform="rotate(-90 12 ' + (W / 2) + ')">Worry about closeness</text>' +
-    body + '</svg>';
+    '<line x1="' + pad + '" y1="' + mid + '" x2="' + (W - pad) + '" y2="' + mid + '" stroke="var(--line)" stroke-width="2"/>' +
+    q(pad + inner / 4, pad - 12, "Anxious") + q(pad + inner * 3 / 4, pad - 12, "Fearful") +
+    q(pad + inner / 4, W - pad + 22, "Secure") + q(pad + inner * 3 / 4, W - pad + 22, "Avoidant") +
+    '<text x="' + (W / 2) + '" y="' + (W - 4) + '" text-anchor="middle" font-size="12" fill="var(--muted)">Need for space →</text>' +
+    '<text x="14" y="' + (W / 2) + '" text-anchor="middle" font-size="12" fill="var(--muted)" transform="rotate(-90 14 ' + (W / 2) + ')">Worry about closeness →</text>' +
+    body + '</svg>' +
+    '<div class="legendrow">' + legend + '</div>' +
+    '<p class="small" style="text-align:center;margin-top:4px">Tap a dot to see what it means</p>';
 }
+
+var DOT_MEANING = {
+  anxious: "When closeness feels shaky, you tend to reach for more of it: checking in, explaining, wanting reassurance.",
+  avoidant: "When closeness gets intense, you tend to turn feelings down and need some space to feel okay.",
+  fearful: "You want closeness and feel wary of it at the same time, so you may reach and then pull back.",
+  secure: "Closeness and space both feel mostly okay. You can ask for what you need and give room."
+};
+var DOT_MEANING_THEM = {
+  anxious: "When closeness feels shaky, they tend to reach for more of it: checking in, explaining, wanting reassurance.",
+  avoidant: "When closeness gets intense, they tend to turn feelings down and need some space to feel okay.",
+  fearful: "They want closeness and feel wary of it at the same time, so they may reach and then pull back.",
+  secure: "Closeness and space both feel mostly okay for them. They can ask for what they need and give room."
+};
+function dotInfo(k) {
+  var p = S.results[k]; if (!p) return;
+  var sk = styleOf(p), s = STYLES[sk];
+  var lean = Math.max(Math.abs(p.a - 3), Math.abs(p.v - 3));
+  var strength = lean < 0.5 ? "a light lean, close to the middle" : lean < 1.2 ? "a clear lean" : "a strong lean";
+  var you = isMe(k);
+  var level = function (x) { return x <= 2 ? "low" : x <= 3 ? "moderate" : x <= 4 ? "high" : "very high"; };
+  var html =
+    '<p class="small">' + esc(you ? "You" : N(k)) + '</p>' +
+    '<h2>' + s.name + '</h2>' +
+    '<p>' + (you ? "You’re in" : esc(N(k)) + " is in") + ' the ' + s.name.toLowerCase() + ' corner, with ' + strength + '.</p>' +
+    '<p>' + esc((you ? DOT_MEANING : DOT_MEANING_THEM)[sk]) + '</p>' +
+    '<p class="small">Worry about closeness: ' + level(p.a) + ' (' + p.a + ' of 5). Need for space: ' + level(p.v) + ' (' + p.v + ' of 5).</p>' +
+    '<p class="small">This is where things are now, not who anyone is forever.</p>' +
+    '<button class="btn" data-sheet="close">Got it</button>';
+  sheet(html);
+}
+function sheet(html) {
+  var old = document.querySelector(".sheetwrap"); if (old) old.remove();
+  var w = document.createElement("div");
+  w.className = "sheetwrap";
+  w.innerHTML = '<div class="sheet" role="dialog" aria-modal="true">' + html + '</div>';
+  document.body.appendChild(w);
+  var close = function () { w.remove(); document.removeEventListener("keydown", key); };
+  var key = function (e) { if (e.key === "Escape") close(); };
+  document.addEventListener("keydown", key);
+  w.addEventListener("click", function (e) { if (e.target === w || e.target.closest("[data-sheet=close]")) close(); });
+  var b = w.querySelector("[data-sheet=close]"); if (b) b.focus();
+}
+
+/* Styles for the map dots and info sheet live here so styles.css doesn’t need to change. */
+(function () {
+  var css = '.dot{cursor:pointer;outline:none}' +
+    '.dot:focus-visible circle:last-child{stroke:var(--focus);stroke-width:4}' +
+    '.dot .pulse{transform-box:fill-box;transform-origin:center;animation:hwcPulse 2s ease-out infinite}' +
+    '@keyframes hwcPulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(2.6);opacity:0}}' +
+    '@media (prefers-reduced-motion:reduce){.dot .pulse{animation:none;opacity:.25;transform:scale(1.6)}}' +
+    '.legendrow{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:8px}' +
+    '.legend{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:8px 14px;min-height:44px;font-weight:700;font-size:15px;cursor:pointer;color:var(--ink)}' +
+    '.legend .sw{width:14px;height:14px;border-radius:50%;flex:none}' +
+    '.sheetwrap{position:fixed;inset:0;z-index:30;background:rgba(10,12,24,.45);display:flex;align-items:flex-end;justify-content:center}' +
+    '.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:22px 22px calc(22px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;max-height:85vh;overflow:auto}' +
+    '@media (min-width:600px){.sheetwrap{align-items:center}.sheet{border-radius:20px}}';
+  var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+})();
 
 function sideFor(k) {
   var s = st(k); if (s) return s.side;
@@ -448,7 +515,7 @@ function vUs() {
   var I = isMe(v) ? "I" : esc(N(v));
   var verb = isMe(v) ? sv.move : sv.move.replace(/^reach/, "reaches").replace(/^go /, "goes ").replace(/ need /, " needs ").replace(/pull back/, "pulls back").replace(/^stay/, "stays");
   return '<h1>' + esc(N("p1")) + ' and ' + esc(N("p2")) + '</h1>' +
-    '<div class="panel">' + mapSVG(["p1", "p2"]) + '<p class="small" style="text-align:center;margin-top:6px">' + esc(N("p1")) + ' leans ' + st("p1").name.toLowerCase() + '. ' + esc(N("p2")) + ' leans ' + st("p2").name.toLowerCase() + '.</p></div>' +
+    '<div class="panel">' + mapSVG(["p1", "p2"]) + '</div>' +
     '<div class="panel stack tight"><h2>How you weave together</h2><p>' + esc(m.pair.text) + '</p></div>' +
     '<div class="panel stack tight"><h2>Where it comes from</h2>' +
       '<div><span class="tag p1">' + esc(N("p1")) + '</span><p style="margin-top:6px">' + esc(st("p1").roots) + '</p></div>' +
@@ -491,7 +558,7 @@ var A = {
     toast("Backup exported");
   },
   erase: function () {
-    if (!confirm("Erase all data on this phone? This can’t be undone.")) return;
+    if (!confirm("Erase everything in the app on this phone and start over? This can’t be undone.")) return;
     try { localStorage.removeItem(KEY); } catch (e) {}
     S = BLANK(); ui.run = null; ui.justDone = null; setView("setup");
   },
@@ -581,6 +648,7 @@ var A = {
     try { navigator.clipboard.writeText(c).then(function () { b.textContent = "Copied"; }, function () { b.textContent = "Copy didn’t work. Code: " + c; }); }
     catch (e) { b.textContent = "Copy didn’t work. Code: " + c; }
   },
+  dotInfo: function (b) { dotInfo(b.dataset.k); },
   scene: function (b) { ui.scene = b.dataset.s; render(); },
   lens: function (b) { ui.lens = b.dataset.k; render(); },
   usView: function (b) { ui.usView = b.dataset.k; render(); },
@@ -595,6 +663,10 @@ document.addEventListener("click", function (e) {
   var act = b.dataset.act;
   if (b.type === "checkbox") return; // handled on change
   if (A[act]) { e.preventDefault(); A[act](b); }
+});
+document.addEventListener("keydown", function (e) {
+  var g = e.target.closest && e.target.closest(".dot");
+  if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); dotInfo(g.dataset.k); }
 });
 document.addEventListener("change", function (e) {
   var t = e.target;
@@ -647,5 +719,21 @@ function merge(inc) {
 }
 
 /* ================= start ================= */
+/* Emergency reset: open the app's link with #reset at the end to erase this phone and start over. */
+function hardReset() {
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  S = BLANK(); ui.run = null; ui.justDone = null; ui.session = null;
+  history.replaceState(null, "", "#setup");
+}
+if (location.hash === "#reset") {
+  if (confirm("Start over? This erases everything saved in this app on this phone.")) hardReset();
+  else history.replaceState(null, "", "#prep");
+}
+window.addEventListener("hashchange", function () {
+  if (location.hash === "#reset") {
+    if (confirm("Start over? This erases everything saved in this app on this phone.")) { hardReset(); setView("setup", false); }
+    else setView("prep");
+  }
+});
 setView((location.hash || "").slice(1) || "prep", false);
 })();
