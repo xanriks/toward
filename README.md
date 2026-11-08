@@ -1,60 +1,62 @@
-# How We Connect
+# Toward
 
-A private companion for couples in therapy. It works on phones, runs offline, and has no accounts or servers.
+A private companion app for couples in therapy. It installs on iPhone and Android like a regular app, works offline, and has no accounts or servers.
 
-It has four parts:
+It has five parts:
 
-- **Prep:** a ten-minute review before each session. It shows what you worked on last time, open follow-ups, moments flagged from the log, and three quick lines from each partner. One tap turns it into that session's notes.
-- **Log:** quick notes as the week happens, like something good, a bid for connection, hitting the loop, a repair, or a hard moment. Any entry can be marked "bring this up at our next session."
-- **Sessions:** notes from each therapy session, what you worked on, plus follow-ups with an owner (either partner or both).
-- **Us:** a two-minute attachment check-in for each partner, everyday "moments" seen from both sides, how your patterns fit together, and small weekly moves.
+- **Prep:** a ten-minute review before each session, covering last session, open follow-ups, flagged moments, skills practice, and three lines from each partner. One tap turns it into that session's notes.
+- **Log:** quick notes through the week, like something good, a bid, hitting the loop, a repair, a hard moment, or a skill practice.
+- **Sessions:** notes from each therapy session, plus follow-ups with an owner.
+- **Us:** a two-minute attachment check-in for each partner, a history chart to see change over time, everyday moments from both sides, and small weekly moves.
+- **Skills:** a pocket mindfulness coach (DBT Module 1). Each skill has a timed "Try it now" practice, and flashcards are timed too. Every practice is logged with how long it took, what you noticed, and how helpful it was.
+
+## Install it on your phone
+
+This is a Progressive Web App (PWA). It installs from the browser instead of the App Store.
+
+- **iPhone:** open the link in Safari, tap Share, then **Add to Home Screen**. If you see **Open as Web App**, leave it on.
+- **Android:** open the link in Chrome, then tap **Install app** (or menu, then **Add to Home screen**).
+
+Once installed, it opens full screen with its own icon, launch screen, and offline support. Installing also keeps your data safe: iPhone Safari can clear website data after a week without a visit, but Home Screen apps keep it.
 
 ## Your data stays on your phone
 
-Everything is saved in the browser on the device you use. Nothing is sent anywhere, and the code has no analytics or tracking.
+Everything is saved on the device you use. Nothing is sent anywhere, and the code has no analytics.
 
-Some things to know:
+- **Each phone has its own copy.** To move data between phones, go to Settings, export a backup, send the file, and import it on the other phone. Importing merges and never erases what's already there.
+- **Export a backup now and then.**
 
-- **Each phone has its own copy.** To move notes between phones, go to Settings, export a backup, send the file, and import it on the other phone. Importing merges and never erases what's already there.
-- **On iPhone, add it to your Home Screen.** Open the site in Safari, tap Share, then Add to Home Screen. Safari can clear a website's saved data after about a week without a visit, but Home Screen apps keep it.
-- **Export a backup now and then,** especially before clearing your browser or switching phones.
+## Notion
+
+- **Weekly summary:** on Prep (or in Settings), tap **Copy for Notion** and paste into a new row of the Weekly check-ins database. The top lines match the database columns.
+- **Practice log:** on Skills, then History, tap **Export CSV for Notion**. In Notion on a computer, open the Practice Log database, click the ••• menu, choose **Merge with CSV**, and pick the file. Each practice becomes a row with skill, date, minutes, helpfulness, and notes. Merge only new entries, or Notion will add duplicates.
 
 ## Starting over
 
-The app has no password. To erase everything on a phone and start fresh, tap the gear icon in the top-right, then **Erase and start over**. If the app ever won't open properly, add `#reset` to the end of your link (for example `https://YOUR-USERNAME.github.io/how-we-connect/#reset`) and confirm.
+Tap the gear, then **Erase and start over**. If the app won't open properly, add `#reset` to the end of the link and confirm.
 
-## Put it online with GitHub Pages (free)
+## Updating the app on GitHub
 
-1. Sign in at https://github.com and create a new repository, for example `how-we-connect`. Leave it **Public**, since free GitHub Pages needs a public repo. Only the app's code goes in the repo, never your notes.
-2. On the repository page, choose **Add file**, then **Upload files**. Drag in everything from this folder: `index.html`, `styles.css`, `app.js`, `content.js`, `sw.js`, `manifest.webmanifest`, `.nojekyll`, `README.md`, and the `icons` folder. Commit.
-   - `.nojekyll` is a hidden file. If your computer hides it, that's fine. The app works without it.
-3. Go to **Settings**, then **Pages**. Under "Build and deployment," set Source to **Deploy from a branch**, Branch to **main**, and folder to **/ (root)**. Save.
-4. After a minute or two the page shows your link, like `https://YOUR-USERNAME.github.io/how-we-connect/`. Open it on your phone and add it to your Home Screen.
-
-Anyone with the link can open the app, but they only ever see their own empty copy. Your data never touches GitHub.
-
-## Setting it up on two phones
-
-On each phone, enter the two names **in the same order**, then pick whose phone it is. Keeping the order the same makes backups and check-in codes line up.
+Upload changed files with **Add file**, then **Upload files**, and commit. GitHub Pages republishes automatically in a minute or two. Always bump `VERSION` in `sw.js` when anything changes, so phones load the new version.
 
 ## Changing the app
 
-- **Words:** scenarios, check-in statements, style descriptions, pairings, and log categories all live in `content.js`.
-- **Look:** colors and type are in `styles.css`. Light and dark mode both follow the phone's setting.
-- **After any change,** open `sw.js` and bump `VERSION` (for example `hwc-v1` to `hwc-v2`), so phones load the new version instead of the saved offline copy.
+- **Words:** all scenarios, check-in statements, styles, log categories, skills, and flashcards live in `content.js`.
+- **Look:** base styles are in `styles.css`. App-feel styles (safe areas, translucent bars, press states) are in `native.css`.
 
 ## A note on the check-in
 
-The ten statements are written in the spirit of attachment research, using the two dimensions of the ECR-R: anxiety and avoidance. They are not the official ECR-R. Results are a starting point for conversation, not a diagnosis.
+The ten statements are written in the spirit of attachment research (the anxiety and avoidance dimensions of the ECR-R). They are not the official ECR-R. Results are a starting point for conversation, not a diagnosis.
 
 ## Files
 
 | File | What it does |
 | --- | --- |
-| `index.html` | The app shell |
-| `styles.css` | All styling |
-| `content.js` | All the written content |
+| `index.html` | App shell, icons, and launch screens |
+| `styles.css` | Base styling |
+| `native.css` | Native-app feel |
+| `content.js` | All written content |
 | `app.js` | App logic and on-device storage |
 | `sw.js` | Offline support |
-| `manifest.webmanifest` | Home Screen install details |
-| `icons/` | App icons |
+| `manifest.webmanifest` | Install details for Android and iPhone |
+| `icons/` | App icons and iPhone launch screens |
